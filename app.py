@@ -57,19 +57,28 @@ def build_prompt(
     lesson_goal: str,
 ) -> str:
     code_section = (
-        "Inclua códigos comentados e explicados passo a passo quando fizer sentido para o tema."
+        dedent(
+            """
+            Inclua código apenas quando ele realmente ajudar a entender ou aplicar o tema.
+            Quando incluir código:
+            - traga um exemplo funcional
+            - explique linha por linha em linguagem simples
+            - mostre a entrada, o processamento e a saída
+            - explique por que esse código resolve o problema apresentado
+            """
+        ).strip()
         if include_code
-        else "Use exemplos sem código quando o tema não exigir programação."
+        else "Não inclua código se ele não fizer sentido para o tema."
     )
 
     exercises_section = (
         dedent(
             """
-            Crie exercícios em 3 níveis:
-            - Básico: 3 exercícios de fixação
-            - Intermediário: 2 exercícios aplicados
-            - Desafio: 1 exercício com cenário real
-            Traga as respostas comentadas de todos.
+            Crie atividades práticas em 3 níveis:
+            - Básico: 3 atividades de compreensão
+            - Intermediário: 2 atividades aplicadas
+            - Desafio: 1 atividade com cenário real
+            Traga gabarito ou orientação de resolução comentada.
             """
         ).strip()
         if include_exercises
@@ -79,13 +88,15 @@ def build_prompt(
     project_section = (
         dedent(
             """
-            Crie um projeto prático para portfólio com:
+            Crie um projeto prático completo com:
             - nome do projeto
             - objetivo
             - problema real que resolve
-            - etapas detalhadas
-            - ferramentas sugeridas
+            - pré-requisitos
+            - materiais ou ferramentas necessárias
+            - passo a passo detalhado de desenvolvimento
             - resultado esperado
+            - como validar se ficou correto
             - melhorias futuras
             """
         ).strip()
@@ -103,7 +114,7 @@ def build_prompt(
         f"""
         Você é um professor especialista, didático e orientado a resultados.
 
-        Sua missão é criar uma aula completa sobre o tema informado, de forma que uma pessoa {audience.lower()} consiga aprender, aplicar e ensinar o conteúdo.
+        Sua missão é criar um material de ensino completo sobre o tema informado, de forma que uma pessoa {audience.lower()} consiga entender, praticar, aplicar e ensinar o conteúdo.
 
         Tema: {theme}
         Nível desejado: {level}
@@ -112,39 +123,46 @@ def build_prompt(
 
         Estruture a resposta exatamente nesta ordem:
 
-        1. Abertura da aula
+        1. Visão geral do tema
+        - Explique o que é.
         - Explique por que esse tema importa.
-        - Dê contexto de uso real.
+        - Mostre onde ele aparece na prática.
 
         2. Explicação intuitiva
         - Explique de forma simples e acessível.
         - Use analogias do cotidiano.
 
-        3. Fundamentos essenciais
-        - Conceitos principais
-        - Definições técnicas sem exagero
-        - Relação entre os conceitos
+        3. Conceitos e fundamentos essenciais
+        - Liste os conceitos centrais.
+        - Explique cada conceito em linguagem clara.
+        - Mostre como os conceitos se conectam.
 
         4. Base teórica essencial
-        - Explique o suficiente para entendimento sólido.
+        - Traga teoria suficiente para entendimento sólido.
         - Evite excesso de academicismo.
+        - Explique o porquê das coisas.
 
         5. Aplicação prática guiada
-        - Mostre passo a passo como aplicar.
+        - Mostre passo a passo como aplicar o tema.
+        - Comece com um exemplo simples.
+        - Evolua para um exemplo mais próximo do mundo real.
 
-        6. Exemplos reais
-        - Um exemplo do dia a dia
-        - Um exemplo profissional
+        6. Exemplo do dia a dia
+        - Dê um exemplo simples e fácil de visualizar.
 
-        7. Erros comuns
-        - Liste os erros de iniciantes e como evitar.
+        7. Exemplo profissional
+        - Dê um exemplo de mercado, negócio, tecnologia ou operação.
 
-        8. Como ensinar esse conteúdo para outra pessoa
+        8. Erros comuns
+        - Liste os erros de iniciantes.
+        - Explique como evitar cada um.
+
+        9. Como ensinar esse conteúdo para outra pessoa
         - Explique em linguagem muito simples.
         - Traga uma versão para iniciantes.
         - Traga uma versão para contexto profissional.
 
-        9. Revisão inteligente
+        10. Resumo inteligente
         - Resumo em tópicos
         - Palavras-chave
         - Checklist do que foi aprendido
@@ -164,6 +182,8 @@ def build_prompt(
         - Vá do simples ao mais técnico.
         - Priorize clareza e utilidade prática.
         - Sempre conecte teoria com prática.
+        - Se o tema pedir código, entregue código realmente utilizável.
+        - Se o tema pedir projeto, entregue desenvolvimento passo a passo.
         - Formate a resposta com títulos e subtítulos bem organizados.
         """
     ).strip()
@@ -480,81 +500,57 @@ def generate_local_lesson(payload: dict[str, Any]) -> str:
     code_block = get_code_example(theme, category) if payload["include_code"] else ""
     project = get_project_example(theme, category) if payload["include_project"] else None
 
-    exercises_block = ""
-    if payload["include_exercises"]:
-        exercises_block = dedent(
-            f"""
-            ## Exercícios prontos para utilizar na aula
-            ### Nível básico
-            1. Explique com suas palavras o que é **{theme}**.
-            2. Cite um problema real que pode ser resolvido com **{theme}**.
-            3. Qual é o principal erro de quem aprende esse tema apenas decorando?
-
-            **Gabarito comentado:**
-            - A resposta deve mostrar entendimento simples e objetivo.
-            - O problema real precisa conectar o tema à prática.
-            - Decorar sem entender impede aplicação real.
-
-            ### Nível intermediário
-            1. Monte um exemplo profissional de uso de **{theme}**.
-            2. Liste três conceitos fundamentais e explique o papel de cada um.
-
-            **Gabarito comentado:**
-            - O aluno deve mostrar contexto, lógica e benefício.
-            - Os conceitos devem ser descritos com clareza, não apenas citados.
-
-            ### Nível desafio
-            1. Estruture uma mini explicação de 5 minutos sobre **{theme}** para um público leigo.
-            2. Proponha uma atividade prática curta para validar aprendizado.
-
-            **Gabarito comentado:**
-            - A mini explicação deve ter abertura, conceito, exemplo e fechamento.
-            - A atividade prática precisa gerar evidência de entendimento.
-            """
-        ).strip()
-
-    project_block = ""
-    if project:
-        steps_md = "\n".join(
-            [f"{i + 1}. {step}" for i, step in enumerate(project["steps"])]
-        )
-        tools_md = "\n".join([f"- {tool}" for tool in project["tools"]])
-        project_block = dedent(
-            f"""
-            ## Projeto prático pronto para uso
-            **Nome do projeto:** {project['name']}
-
-            **Objetivo:**
-            {project['objective']}
-
-            **Problema que resolve:**
-            {project['problem']}
-
-            **Passo a passo:**
-            {steps_md}
-
-            **Ferramentas sugeridas:**
-            {tools_md}
-
-            **Entrega final esperada:**
-            {project['deliverable']}
-            """
-        ).strip()
-
-    plan_block = ""
-    if payload["include_plan"]:
-        plan_block = dedent(
-            f"""
-            ## Plano de aula ou estudo em 7 dias
-            - **Dia 1:** visão geral e motivação sobre {theme}
-            - **Dia 2:** conceitos fundamentais
-            - **Dia 3:** base teórica essencial
-            - **Dia 4:** leitura de exemplo prático
-            - **Dia 5:** execução dos exercícios
-            - **Dia 6:** desenvolvimento do projeto
-            - **Dia 7:** apresentação, revisão e ensino para outra pessoa
-            """
-        ).strip()
+    fundamentals_map = {
+        "sql": [
+            "tabelas e colunas",
+            "seleção de dados com SELECT",
+            "filtros com WHERE",
+            "agrupamento com GROUP BY",
+            "ordenação com ORDER BY",
+        ],
+        "python": [
+            "variáveis e estruturas básicas",
+            "manipulação de dados",
+            "uso de bibliotecas",
+            "lógica passo a passo",
+            "interpretação da saída",
+        ],
+        "ml": [
+            "dados de entrada e saída",
+            "treino e teste",
+            "modelo preditivo",
+            "previsão",
+            "avaliação de desempenho",
+        ],
+        "powerbi": [
+            "importação de dados",
+            "modelagem simples",
+            "medidas DAX",
+            "visualização",
+            "interpretação de indicadores",
+        ],
+        "crispdm": [
+            "entendimento do negócio",
+            "entendimento dos dados",
+            "preparação dos dados",
+            "modelagem",
+            "avaliação e implantação",
+        ],
+        "processos": [
+            "mapeamento do fluxo",
+            "identificação de etapas",
+            "gargalos",
+            "métricas",
+            "melhoria contínua",
+        ],
+        "generic": [
+            "conceito principal",
+            "partes do tema",
+            "aplicação prática",
+            "erros comuns",
+            "como ensinar",
+        ],
+    }
 
     theory_map = {
         "sql": "SQL é a linguagem usada para consultar e manipular dados em bancos relacionais. A lógica principal está em selecionar, filtrar, agrupar e ordenar informações para responder perguntas de negócio.",
@@ -576,26 +572,129 @@ def generate_local_lesson(payload: dict[str, Any]) -> str:
         "generic": f"Pense em {theme} como uma ferramenta para entender melhor um problema e agir de forma mais segura.",
     }
 
+    day_to_day_map = {
+        "sql": "Imagine uma loja com milhares de vendas registradas. SQL ajuda a descobrir rapidamente quais produtos venderam mais, em que período e para quais clientes.",
+        "python": "Imagine calcular automaticamente o lucro de vários produtos sem fazer conta manualmente. Python faz esse trabalho repetitivo por você.",
+        "ml": "Imagine prever a nota de um aluno com base em horas de estudo observando exemplos anteriores. Essa é a lógica inicial do aprendizado de máquina.",
+        "powerbi": "Imagine transformar uma planilha confusa em um painel claro com indicadores fáceis de interpretar.",
+        "crispdm": "Imagine organizar um projeto de dados do começo ao fim sem pular etapas importantes.",
+        "processos": "Imagine melhorar um atendimento que demora muito identificando cada etapa e o ponto onde tudo trava.",
+        "generic": f"Imagine uma situação comum em que {theme} ajude a organizar, entender ou melhorar um problema real.",
+    }
+
+    professional_map = {
+        "sql": "Em empresas, SQL é usado para responder perguntas de negócio com base em dados: faturamento, clientes, produtos e desempenho operacional.",
+        "python": "No mercado, Python é usado para automação, análise de dados, construção de relatórios, APIs e aplicações.",
+        "ml": "No contexto profissional, machine learning pode apoiar previsão de demanda, risco, churn, recomendação e classificação.",
+        "powerbi": "No ambiente corporativo, Power BI ajuda líderes a acompanhar KPIs, metas, desvios e oportunidades de ação.",
+        "crispdm": "Em projetos reais, CRISP-DM ajuda a manter foco no problema do negócio e na entrega de valor, não apenas no modelo.",
+        "processos": "Em operações, análise de processos ajuda a reduzir fila, desperdício, retrabalho e atrasos.",
+        "generic": f"No contexto profissional, {theme} pode apoiar análise, melhoria, tomada de decisão ou entrega de valor.",
+    }
+
+    fundamentals = fundamentals_map.get(category, fundamentals_map["generic"])
+    fundamentals_md = "\n".join([f"- {item}" for item in fundamentals])
+
+    exercises_block = ""
+    if payload["include_exercises"]:
+        exercises_block = dedent(
+            f"""
+            ## Atividades práticas prontas para utilizar
+            ### Nível básico
+            1. Explique com suas palavras o que é **{theme}**.
+            2. Cite um problema real que pode ser resolvido com **{theme}**.
+            3. Liste os conceitos mais importantes do tema e diga por que eles importam.
+
+            **Orientação de resolução:**
+            - O aluno deve explicar o conceito de forma simples.
+            - Deve conectar o tema a uma situação real.
+            - Deve demonstrar que entendeu a base antes de avançar.
+
+            ### Nível intermediário
+            1. Monte um exemplo aplicado de uso de **{theme}** no trabalho ou em um projeto.
+            2. Explique quais decisões precisam ser tomadas para aplicar esse tema corretamente.
+
+            **Orientação de resolução:**
+            - A resposta deve unir conceito e aplicação.
+            - O aluno deve justificar as escolhas feitas.
+
+            ### Nível desafio
+            1. Crie uma mini solução usando **{theme}** para resolver um problema específico.
+            2. Explique como você ensinaria essa solução para outra pessoa.
+
+            **Orientação de resolução:**
+            - A resposta deve mostrar clareza, aplicação e comunicação.
+            - O aluno precisa mostrar que sabe construir e explicar.
+            """
+        ).strip()
+
+    project_block = ""
+    if project:
+        steps_md = "\n".join([f"{i + 1}. {step}" for i, step in enumerate(project["steps"])])
+        tools_md = "\n".join([f"- {tool}" for tool in project["tools"]])
+        project_block = dedent(
+            f"""
+            ## Projeto prático com desenvolvimento passo a passo
+            **Nome do projeto:** {project['name']}
+
+            **Objetivo:**
+            {project['objective']}
+
+            **Problema que resolve:**
+            {project['problem']}
+
+            **Pré-requisitos:**
+            - noções básicas do tema
+            - vontade de praticar com um caso real ou simulado
+
+            **Ferramentas sugeridas:**
+            {tools_md}
+
+            **Passo a passo de desenvolvimento:**
+            {steps_md}
+
+            **Como validar se deu certo:**
+            - verificar se o resultado final responde ao problema inicial
+            - testar o material, código, painel ou fluxo gerado
+            - revisar se a solução consegue ser explicada para outra pessoa
+
+            **Entrega final esperada:**
+            {project['deliverable']}
+            """
+        ).strip()
+
+    plan_block = ""
+    if payload["include_plan"]:
+        plan_block = dedent(
+            f"""
+            ## Plano de aula ou estudo em 7 dias
+            - **Dia 1:** visão geral e motivação sobre {theme}
+            - **Dia 2:** conceitos e fundamentos essenciais
+            - **Dia 3:** base teórica e explicação intuitiva
+            - **Dia 4:** prática guiada com exemplo
+            - **Dia 5:** execução das atividades práticas
+            - **Dia 6:** desenvolvimento do projeto passo a passo
+            - **Dia 7:** revisão final e ensino para outra pessoa
+            """
+        ).strip()
+
     return dedent(
         f"""
-        # Aula completa: {theme}
+        # Material completo: {theme}
 
         **Nível:** {level}  
         **Público:** {audience}  
         **Área:** {area_focus}  
         **Objetivo:** {goal}
 
-        ## 1. Abertura da aula
+        ## 1. Visão geral do tema
         O tema **{theme}** é importante porque ajuda a transformar conhecimento em ação. Quando o aluno entende esse assunto, ele consegue resolver problemas, tomar decisões melhores e explicar o conteúdo com segurança.
 
         ## 2. Explicação intuitiva
         {intuitive_map.get(category, intuitive_map['generic'])}
 
-        ## 3. Fundamentos essenciais
-        - entender o conceito principal do tema
-        - reconhecer os elementos que fazem o tema funcionar
-        - saber onde ele aparece no dia a dia e no trabalho
-        - ligar teoria, prática e resultado
+        ## 3. Conceitos e fundamentos essenciais
+        {fundamentals_md}
 
         ## 4. Base teórica essencial
         {theory_map.get(category, theory_map['generic'])}
@@ -605,20 +704,20 @@ def generate_local_lesson(payload: dict[str, Any]) -> str:
         2. Mostre como {theme} ajuda a organizar a solução.
         3. Demonstre um exemplo pequeno e comentado.
         4. Peça ao aluno para adaptar o exemplo.
-        5. Finalize conectando o conteúdo a um caso profissional.
+        5. Evolua para um caso mais próximo da prática real.
 
         ## 6. Exemplo do dia a dia
-        Mostre uma situação simples em que alguém precisa organizar informação, comparar opções, prever resultado ou melhorar uma atividade. A partir daí, conecte essa necessidade ao tema.
+        {day_to_day_map.get(category, day_to_day_map['generic'])}
 
         ## 7. Exemplo profissional
-        Apresente um cenário de negócio no qual {theme} ajuda a gerar eficiência, análise, melhoria, previsão ou decisão mais embasada.
+        {professional_map.get(category, professional_map['generic'])}
 
         ## 8. Erros comuns
         - tentar avançar sem dominar a base
         - decorar sem entender a lógica
-        - ignorar exercícios práticos
+        - ignorar atividades práticas
         - não revisar o que foi aprendido
-        - focar na ferramenta e esquecer o problema real
+        - focar só na ferramenta e esquecer o problema real
 
         ## 9. Como ensinar esse conteúdo para outra pessoa
         Comece com uma analogia simples. Em seguida, mostre o conceito técnico em linguagem acessível. Depois, apresente um exemplo real. Por fim, peça que a pessoa explique com as próprias palavras o que entendeu.
