@@ -10,7 +10,7 @@ st.set_page_config(
     page_title="Ensina.AI — Aula Inteligente",
     page_icon="🎓",
     layout="wide",
-))==========
+)
 # Estado da aplicação
 # ============================================================
 def init_session_state() -> None:
