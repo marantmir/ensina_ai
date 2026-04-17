@@ -9,7 +9,8 @@ import streamlit as st
 st.set_page_config(
     page_title="Ensina.AI — Aula Inteligente",
     page_icon="🎓",
-    layou([console.groq.com](https://console.groq.com/docs/api-reference?utm_source=chatgpt.com))==========
+    layout="wide",
+))==========
 # Estado da aplicação
 # ============================================================
 def init_session_state() -> None:
