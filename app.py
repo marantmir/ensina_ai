@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 from textwrap import dedent
+from typing import Any
 
 import requests
 import streamlit as st
@@ -229,7 +230,7 @@ def get_code_example(theme: str, category: str) -> str:
             dados = {
                 "produto": ["A", "B", "C", "D"],
                 "vendas": [120, 90, 150, 80],
-                "custo": [70, 50, 80, 45]
+                "custo": [70, 50, 80, 45],
             }
 
             df = pd.DataFrame(dados)
@@ -255,19 +256,23 @@ def get_code_example(theme: str, category: str) -> str:
             ## Código pronto para aula
             ```python
             import pandas as pd
-            from sklearn.model_selection import train_test_split
             from sklearn.linear_model import LinearRegression
             from sklearn.metrics import mean_absolute_error
+            from sklearn.model_selection import train_test_split
 
-            df = pd.DataFrame({
-                "horas_estudo": [1, 2, 3, 4, 5, 6, 7, 8],
-                "nota": [3, 4, 4.5, 5, 6, 7, 8, 9]
-            })
+            df = pd.DataFrame(
+                {
+                    "horas_estudo": [1, 2, 3, 4, 5, 6, 7, 8],
+                    "nota": [3, 4, 4.5, 5, 6, 7, 8, 9],
+                }
+            )
 
             X = df[["horas_estudo"]]
             y = df["nota"]
 
-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)
+            X_train, X_test, y_train, y_test = train_test_split(
+                X, y, test_size=0.25, random_state=42
+            )
 
             modelo = LinearRegression()
             modelo.fit(X_train, y_train)
@@ -367,8 +372,8 @@ def get_code_example(theme: str, category: str) -> str:
 
 
 
-def get_project_example(theme: str, category: str) -> str:
-    projects = {
+def get_project_example(theme: str, category: str) -> dict[str, Any]:
+    projects: dict[str, dict[str, Any]] = {
         "sql": {
             "name": "Mini Laboratório de Consultas SQL",
             "objective": "Ensinar leitura, filtro, agrupamento e ordenação de dados em tabelas de vendas.",
@@ -465,7 +470,7 @@ def get_project_example(theme: str, category: str) -> str:
 
 
 
-def generate_local_lesson(payload: dict) -> str:
+def generate_local_lesson(payload: dict[str, Any]) -> str:
     theme = payload["theme"]
     level = payload["level"]
     audience = payload["audience"]
@@ -510,11 +515,11 @@ def generate_local_lesson(payload: dict) -> str:
 
     project_block = ""
     if project:
-        steps_md = "
-            ".join([f"{i+1}. {step}" for i, step in enumerate(project["steps"])])
-            tools_md = "
-            ".join([f"- {tool}" for tool in project["tools"]])
-            project_block = dedent(
+        steps_md = "\n".join(
+            [f"{i + 1}. {step}" for i, step in enumerate(project["steps"])]
+        )
+        tools_md = "\n".join([f"- {tool}" for tool in project["tools"]])
+        project_block = dedent(
             f"""
             ## Projeto prático pronto para uso
             **Nome do projeto:** {project['name']}
@@ -638,22 +643,32 @@ def generate_local_lesson(payload: dict) -> str:
 # ============================================================
 # Integração com API de IA
 # ============================================================
-def get_ai_config() -> dict:
+def get_ai_config() -> dict[str, Any]:
+    try:
+        api_key = st.secrets.get("OPENAI_API_KEY", "")
+        model = st.secrets.get("OPENAI_MODEL", "gpt-4.1-mini")
+        base_url = st.secrets.get("OPENAI_BASE_URL", "https://api.openai.com/v1")
+    except Exception:
+        api_key = ""
+        model = "gpt-4.1-mini"
+        base_url = "https://api.openai.com/v1"
+
     return {
-        "api_key": st.secrets.get("OPENAI_API_KEY", "") if hasattr(st, "secrets") else "",
-        "model": st.secrets.get("OPENAI_MODEL", "gpt-4.1-mini") if hasattr(st, "secrets") else "gpt-4.1-mini",
-        "base_url": st.secrets.get("OPENAI_BASE_URL", "https://api.openai.com/v1") if hasattr(st, "secrets") else "https://api.openai.com/v1",
-        "enabled": bool(st.secrets.get("OPENAI_API_KEY", "")) if hasattr(st, "secrets") else False,
+        "api_key": api_key,
+        "model": model,
+        "base_url": base_url,
+        "enabled": bool(api_key),
     }
 
 
-def extract_text_from_response(data: dict) -> str:
+
+def extract_text_from_response(data: dict[str, Any]) -> str:
     if isinstance(data, dict):
         if isinstance(data.get("output_text"), str) and data["output_text"].strip():
             return data["output_text"].strip()
 
         output = data.get("output", [])
-        collected = []
+        collected: list[str] = []
         for item in output:
             content_items = item.get("content", []) if isinstance(item, dict) else []
             for content in content_items:
@@ -665,6 +680,7 @@ def extract_text_from_response(data: dict) -> str:
             return "\n\n".join(collected)
 
     return ""
+
 
 
 def generate_with_ai(prompt: str, temperature: float = 0.4) -> str:
@@ -703,7 +719,7 @@ def generate_with_ai(prompt: str, temperature: float = 0.4) -> str:
 # ============================================================
 # Persistência em sessão
 # ============================================================
-def save_history(theme: str, result: str, payload: dict, source: str) -> None:
+def save_history(theme: str, result: str, payload: dict[str, Any], source: str) -> None:
     st.session_state.history.insert(
         0,
         {
@@ -721,7 +737,7 @@ def save_history(theme: str, result: str, payload: dict, source: str) -> None:
 # ============================================================
 # Interface
 # ============================================================
-def render_sidebar() -> dict:
+def render_sidebar() -> dict[str, Any]:
     with st.sidebar:
         st.header("Configurações da aula")
         theme = st.text_input("Tema da aula", placeholder="Ex.: SQL para análise de dados")
@@ -751,11 +767,8 @@ def render_sidebar() -> dict:
 
         st.subheader("Modo de geração")
         ai_enabled = get_ai_config()["enabled"]
-        generation_mode = st.radio(
-            "Escolha o modo",
-            ["IA real" if ai_enabled else "Modo local", "Modo local"],
-            index=0,
-        )
+        generation_options = ["Modo local"] if not ai_enabled else ["IA real", "Modo local"]
+        generation_mode = st.radio("Escolha o modo", generation_options, index=0)
         temperature = st.slider("Criatividade", min_value=0.0, max_value=1.0, value=0.4, step=0.1)
 
         generate = st.button("Gerar aula completa", type="primary", use_container_width=True)
@@ -786,6 +799,7 @@ def render_sidebar() -> dict:
     }
 
 
+
 def render_overview() -> None:
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -798,6 +812,7 @@ def render_overview() -> None:
     st.info(
         "Este app já está preparado para duas fases: teste local sem custo e geração inteligente com API de IA quando você adicionar a chave nas secrets."
     )
+
 
 
 def render_setup_tab() -> None:
@@ -833,6 +848,7 @@ def render_setup_tab() -> None:
     )
 
 
+
 def render_history_tab() -> None:
     st.subheader("Histórico da sessão")
     if not st.session_state.history:
@@ -851,7 +867,8 @@ def render_history_tab() -> None:
             )
 
 
-def render_generator_tab(payload: dict) -> None:
+
+def render_generator_tab(payload: dict[str, Any]) -> None:
     st.subheader("Gerador inteligente")
     st.markdown(
         """
@@ -904,6 +921,7 @@ def render_generator_tab(payload: dict) -> None:
             file_name="aula_completa.md",
             mime="text/markdown",
         )
+
 
 
 def main() -> None:
