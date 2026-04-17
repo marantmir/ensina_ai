@@ -9,11 +9,7 @@ import streamlit as st
 st.set_page_config(
     page_title="Ensina.AI — Aula Inteligente",
     page_icon="🎓",
-    layout="wide",
-)
-
-
-# ============================================================
+    layou([console.groq.com](https://console.groq.com/docs/api-reference?utm_source=chatgpt.com))==========
 # Estado da aplicação
 # ============================================================
 def init_session_state() -> None:
@@ -209,14 +205,12 @@ def infer_theme_category(theme: str) -> str:
     return "generic"
 
 
-
 def get_code_example(theme: str, category: str) -> str:
     examples = {
         "sql": dedent(
             """
             ## Código pronto para aula
             ```sql
-            -- Exemplo: análise simples de vendas
             SELECT
                 categoria,
                 COUNT(*) AS total_pedidos,
@@ -227,18 +221,6 @@ def get_code_example(theme: str, category: str) -> str:
             GROUP BY categoria
             ORDER BY faturamento DESC;
             ```
-
-            **Como explicar esse código em aula:**
-            - `SELECT` escolhe as colunas e cálculos.
-            - `COUNT(*)` conta quantos pedidos existem em cada categoria.
-            - `SUM(valor_venda)` soma o faturamento.
-            - `AVG(valor_venda)` calcula o valor médio por venda.
-            - `WHERE` filtra o período.
-            - `GROUP BY` agrupa por categoria.
-            - `ORDER BY` mostra as categorias mais relevantes primeiro.
-
-            **Exercício guiado:**
-            Peça ao aluno para trocar `categoria` por `cliente` ou `regiao` e observar como a análise muda.
             """
         ).strip(),
         "python": dedent(
@@ -256,19 +238,8 @@ def get_code_example(theme: str, category: str) -> str:
             df = pd.DataFrame(dados)
             df["lucro"] = df["vendas"] - df["custo"]
             df["margem"] = (df["lucro"] / df["vendas"]) * 100
-
             print(df)
-            print("Lucro total:", df["lucro"].sum())
             ```
-
-            **Como explicar esse código em aula:**
-            - `DataFrame` organiza os dados em formato de tabela.
-            - A coluna `lucro` mostra a diferença entre venda e custo.
-            - A coluna `margem` mostra o percentual de ganho.
-            - `sum()` soma o lucro de todos os produtos.
-
-            **Resultado esperado:**
-            O aluno entende como transformar dados brutos em informação útil.
             """
         ).strip(),
         "ml": dedent(
@@ -280,101 +251,29 @@ def get_code_example(theme: str, category: str) -> str:
             from sklearn.metrics import mean_absolute_error
             from sklearn.model_selection import train_test_split
 
-            df = pd.DataFrame(
-                {
-                    "horas_estudo": [1, 2, 3, 4, 5, 6, 7, 8],
-                    "nota": [3, 4, 4.5, 5, 6, 7, 8, 9],
-                }
-            )
+            df = pd.DataFrame({
+                "horas_estudo": [1, 2, 3, 4, 5, 6, 7, 8],
+                "nota": [3, 4, 4.5, 5, 6, 7, 8, 9],
+            })
 
             X = df[["horas_estudo"]]
             y = df["nota"]
-
-            X_train, X_test, y_train, y_test = train_test_split(
-                X, y, test_size=0.25, random_state=42
-            )
-
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)
             modelo = LinearRegression()
             modelo.fit(X_train, y_train)
-
             previsoes = modelo.predict(X_test)
             erro = mean_absolute_error(y_test, previsoes)
-
-            print("Previsões:", previsoes)
             print("Erro médio absoluto:", round(erro, 2))
             ```
-
-            **Como explicar esse código em aula:**
-            - O modelo aprende a relação entre horas de estudo e nota.
-            - `fit()` é a etapa de aprendizado.
-            - `predict()` gera previsões para novos dados.
-            - `mean_absolute_error` mede o quanto o modelo erra, em média.
             """
         ).strip(),
         "powerbi": dedent(
             """
             ## Conteúdo prático para aula
-            ### Medidas DAX prontas
             ```DAX
             Faturamento Total = SUM(Vendas[ValorVenda])
-
             Ticket Médio = DIVIDE(SUM(Vendas[ValorVenda]), COUNT(Vendas[IDPedido]))
-
-            Margem Percentual =
-            DIVIDE(
-                SUM(Vendas[Lucro]),
-                SUM(Vendas[ValorVenda]),
-                0
-            )
             ```
-
-            **Como explicar em aula:**
-            - `SUM` soma os valores.
-            - `COUNT` conta registros.
-            - `DIVIDE` evita erro por divisão por zero.
-            - As medidas podem ser usadas em cartões, tabelas e gráficos.
-
-            **Exercício guiado:**
-            Criar um painel com faturamento, ticket médio e margem por categoria.
-            """
-        ).strip(),
-        "crispdm": dedent(
-            """
-            ## Estrutura pronta para aula
-            ### Exemplo aplicado de CRISP-DM
-            1. **Entendimento do negócio:** reduzir cancelamento de clientes.
-            2. **Entendimento dos dados:** analisar histórico de uso, perfil e reclamações.
-            3. **Preparação dos dados:** tratar nulos, padronizar colunas e criar variáveis.
-            4. **Modelagem:** testar classificação para prever risco de cancelamento.
-            5. **Avaliação:** medir precisão, recall e impacto no negócio.
-            6. **Implantação:** entregar dashboard e lista de clientes com maior risco.
-
-            **Como explicar em aula:**
-            Mostre que o CRISP-DM não começa na modelagem; ele começa no problema real.
-            """
-        ).strip(),
-        "processos": dedent(
-            """
-            ## Exemplo prático para aula
-            ### Mapeamento simples de processo
-            **Processo:** atendimento de incidente de TI
-
-            Etapas:
-            1. Registro do chamado
-            2. Triagem
-            3. Direcionamento para equipe
-            4. Tratativa
-            5. Validação com usuário
-            6. Encerramento
-
-            **Métricas para ensinar:**
-            - tempo de primeira resposta
-            - tempo total de resolução
-            - taxa de reabertura
-            - volume por fila
-
-            **Exercício guiado:**
-            Peça ao aluno para identificar gargalos e propor melhoria em uma etapa.
             """
         ).strip(),
         "generic": dedent(
@@ -389,7 +288,6 @@ def get_code_example(theme: str, category: str) -> str:
         ).strip(),
     }
     return examples.get(category, examples["generic"])
-
 
 
 def get_project_example(theme: str, category: str) -> dict[str, Any]:
@@ -433,45 +331,6 @@ def get_project_example(theme: str, category: str) -> dict[str, Any]:
             "tools": ["Python", "Pandas", "Scikit-learn", "Jupyter ou Streamlit"],
             "deliverable": "Um exemplo funcional de regressão com explicação didática.",
         },
-        "powerbi": {
-            "name": "Dashboard de Indicadores Comerciais",
-            "objective": "Ensinar modelagem simples, medidas DAX e visualização de KPIs.",
-            "problem": "Usuários iniciantes costumam criar gráficos bonitos, mas sem lógica analítica.",
-            "steps": [
-                "Importar uma tabela de vendas.",
-                "Criar medidas de faturamento, ticket médio e margem.",
-                "Montar uma página com cartões e gráficos.",
-                "Apresentar a leitura do dashboard como história de negócio.",
-            ],
-            "tools": ["Power BI Desktop", "Excel ou CSV", "GitHub para documentação"],
-            "deliverable": "Um dashboard com KPIs e narrativa analítica.",
-        },
-        "crispdm": {
-            "name": "Projeto Guiado com CRISP-DM",
-            "objective": "Ensinar metodologia de dados conectando problema, dados, modelo e entrega.",
-            "problem": "Muitas pessoas começam pelo algoritmo e esquecem do contexto do negócio.",
-            "steps": [
-                "Definir o problema de negócio.",
-                "Mapear os dados disponíveis.",
-                "Planejar preparação e modelagem.",
-                "Definir como avaliar e implantar o resultado.",
-            ],
-            "tools": ["Documento estruturado", "Python ou Power BI", "GitHub"],
-            "deliverable": "Um projeto completo documentado pelas seis fases do CRISP-DM.",
-        },
-        "processos": {
-            "name": "Diagnóstico de Processo Operacional",
-            "objective": "Ensinar análise de processo, gargalos e indicadores.",
-            "problem": "Equipes conhecem a operação, mas não conseguem estruturá-la para melhorar.",
-            "steps": [
-                "Escolher um processo simples.",
-                "Mapear etapas, entradas e saídas.",
-                "Definir métricas principais.",
-                "Propor melhoria com justificativa.",
-            ],
-            "tools": ["Miro, Draw.io ou PowerPoint", "Excel", "Documento em Markdown"],
-            "deliverable": "Mapa do processo com proposta de melhoria e indicadores.",
-        },
         "generic": {
             "name": f"Projeto Aplicado de {theme}",
             "objective": f"Transformar o tema {theme} em algo ensinável e aplicável.",
@@ -489,7 +348,6 @@ def get_project_example(theme: str, category: str) -> dict[str, Any]:
     return projects.get(category, projects["generic"])
 
 
-
 def generate_local_lesson(payload: dict[str, Any]) -> str:
     theme = payload["theme"]
     level = payload["level"]
@@ -501,64 +359,16 @@ def generate_local_lesson(payload: dict[str, Any]) -> str:
     project = get_project_example(theme, category) if payload["include_project"] else None
 
     fundamentals_map = {
-        "sql": [
-            "tabelas e colunas",
-            "seleção de dados com SELECT",
-            "filtros com WHERE",
-            "agrupamento com GROUP BY",
-            "ordenação com ORDER BY",
-        ],
-        "python": [
-            "variáveis e estruturas básicas",
-            "manipulação de dados",
-            "uso de bibliotecas",
-            "lógica passo a passo",
-            "interpretação da saída",
-        ],
-        "ml": [
-            "dados de entrada e saída",
-            "treino e teste",
-            "modelo preditivo",
-            "previsão",
-            "avaliação de desempenho",
-        ],
-        "powerbi": [
-            "importação de dados",
-            "modelagem simples",
-            "medidas DAX",
-            "visualização",
-            "interpretação de indicadores",
-        ],
-        "crispdm": [
-            "entendimento do negócio",
-            "entendimento dos dados",
-            "preparação dos dados",
-            "modelagem",
-            "avaliação e implantação",
-        ],
-        "processos": [
-            "mapeamento do fluxo",
-            "identificação de etapas",
-            "gargalos",
-            "métricas",
-            "melhoria contínua",
-        ],
-        "generic": [
-            "conceito principal",
-            "partes do tema",
-            "aplicação prática",
-            "erros comuns",
-            "como ensinar",
-        ],
+        "sql": ["tabelas e colunas", "seleção de dados com SELECT", "filtros com WHERE", "agrupamento com GROUP BY", "ordenação com ORDER BY"],
+        "python": ["variáveis e estruturas básicas", "manipulação de dados", "uso de bibliotecas", "lógica passo a passo", "interpretação da saída"],
+        "ml": ["dados de entrada e saída", "treino e teste", "modelo preditivo", "previsão", "avaliação de desempenho"],
+        "generic": ["conceito principal", "partes do tema", "aplicação prática", "erros comuns", "como ensinar"],
     }
 
     theory_map = {
         "sql": "SQL é a linguagem usada para consultar e manipular dados em bancos relacionais. A lógica principal está em selecionar, filtrar, agrupar e ordenar informações para responder perguntas de negócio.",
         "python": "Python é uma linguagem muito usada para automação, análise de dados e desenvolvimento de aplicações. Seu valor no ensino está na leitura simples e na capacidade de transformar lógica em resultado prático.",
         "ml": "Machine Learning ensina o computador a identificar padrões a partir de dados. Em vez de programar todas as regras manualmente, fornecemos exemplos para o modelo aprender relações e fazer previsões.",
-        "powerbi": "Power BI ajuda a transformar dados em painéis analíticos e indicadores. O foco não deve ser só visual, mas também interpretação, perguntas de negócio e tomada de decisão.",
-        "crispdm": "CRISP-DM é uma metodologia que organiza projetos de dados do entendimento do problema até a implantação. Ele evita que a análise fique solta e sem conexão com o negócio.",
-        "processos": "Processos bem definidos reduzem desperdício, aumentam previsibilidade e melhoram entregas. O valor do tema está em enxergar etapas, gargalos, métricas e oportunidades de melhoria.",
         "generic": f"{theme} deve ser ensinado como algo que sai da teoria e chega à prática. O ponto principal é mostrar conceito, aplicação e utilidade real.",
     }
 
@@ -566,19 +376,13 @@ def generate_local_lesson(payload: dict[str, Any]) -> str:
         "sql": "Imagine um arquivo gigante de informações. SQL é a forma organizada de fazer perguntas a esse arquivo para encontrar respostas com rapidez.",
         "python": "Imagine que você quer ensinar o computador a repetir tarefas e fazer contas por você. Python é uma forma simples de dar essas instruções.",
         "ml": "Pense em Machine Learning como um aluno que observa muitos exemplos e começa a reconhecer padrões sozinho.",
-        "powerbi": "Pense no Power BI como uma vitrine inteligente dos dados: ele não cria os fatos, mas mostra com clareza o que está acontecendo.",
-        "crispdm": "Pense no CRISP-DM como um mapa de viagem para projetos de dados: ele evita que você se perca no caminho.",
-        "processos": "Pense em processos como o passo a passo de uma receita. Quando a ordem é clara, o resultado tende a ser melhor.",
         "generic": f"Pense em {theme} como uma ferramenta para entender melhor um problema e agir de forma mais segura.",
     }
 
     day_to_day_map = {
         "sql": "Imagine uma loja com milhares de vendas registradas. SQL ajuda a descobrir rapidamente quais produtos venderam mais, em que período e para quais clientes.",
         "python": "Imagine calcular automaticamente o lucro de vários produtos sem fazer conta manualmente. Python faz esse trabalho repetitivo por você.",
-        "ml": "Imagine prever a nota de um aluno com base em horas de estudo observando exemplos anteriores. Essa é a lógica inicial do aprendizado de máquina.",
-        "powerbi": "Imagine transformar uma planilha confusa em um painel claro com indicadores fáceis de interpretar.",
-        "crispdm": "Imagine organizar um projeto de dados do começo ao fim sem pular etapas importantes.",
-        "processos": "Imagine melhorar um atendimento que demora muito identificando cada etapa e o ponto onde tudo trava.",
+        "ml": "Imagine prever a nota de um aluno com base em horas de estudo observando exemplos anteriores.",
         "generic": f"Imagine uma situação comum em que {theme} ajude a organizar, entender ou melhorar um problema real.",
     }
 
@@ -586,9 +390,6 @@ def generate_local_lesson(payload: dict[str, Any]) -> str:
         "sql": "Em empresas, SQL é usado para responder perguntas de negócio com base em dados: faturamento, clientes, produtos e desempenho operacional.",
         "python": "No mercado, Python é usado para automação, análise de dados, construção de relatórios, APIs e aplicações.",
         "ml": "No contexto profissional, machine learning pode apoiar previsão de demanda, risco, churn, recomendação e classificação.",
-        "powerbi": "No ambiente corporativo, Power BI ajuda líderes a acompanhar KPIs, metas, desvios e oportunidades de ação.",
-        "crispdm": "Em projetos reais, CRISP-DM ajuda a manter foco no problema do negócio e na entrega de valor, não apenas no modelo.",
-        "processos": "Em operações, análise de processos ajuda a reduzir fila, desperdício, retrabalho e atrasos.",
         "generic": f"No contexto profissional, {theme} pode apoiar análise, melhoria, tomada de decisão ou entrega de valor.",
     }
 
@@ -605,26 +406,13 @@ def generate_local_lesson(payload: dict[str, Any]) -> str:
             2. Cite um problema real que pode ser resolvido com **{theme}**.
             3. Liste os conceitos mais importantes do tema e diga por que eles importam.
 
-            **Orientação de resolução:**
-            - O aluno deve explicar o conceito de forma simples.
-            - Deve conectar o tema a uma situação real.
-            - Deve demonstrar que entendeu a base antes de avançar.
-
             ### Nível intermediário
             1. Monte um exemplo aplicado de uso de **{theme}** no trabalho ou em um projeto.
             2. Explique quais decisões precisam ser tomadas para aplicar esse tema corretamente.
 
-            **Orientação de resolução:**
-            - A resposta deve unir conceito e aplicação.
-            - O aluno deve justificar as escolhas feitas.
-
             ### Nível desafio
             1. Crie uma mini solução usando **{theme}** para resolver um problema específico.
             2. Explique como você ensinaria essa solução para outra pessoa.
-
-            **Orientação de resolução:**
-            - A resposta deve mostrar clareza, aplicação e comunicação.
-            - O aluno precisa mostrar que sabe construir e explicar.
             """
         ).strip()
 
@@ -653,11 +441,6 @@ def generate_local_lesson(payload: dict[str, Any]) -> str:
             **Passo a passo de desenvolvimento:**
             {steps_md}
 
-            **Como validar se deu certo:**
-            - verificar se o resultado final responde ao problema inicial
-            - testar o material, código, painel ou fluxo gerado
-            - revisar se a solução consegue ser explicada para outra pessoa
-
             **Entrega final esperada:**
             {project['deliverable']}
             """
@@ -682,13 +465,13 @@ def generate_local_lesson(payload: dict[str, Any]) -> str:
         f"""
         # Material completo: {theme}
 
-        **Nível:** {level}  
-        **Público:** {audience}  
-        **Área:** {area_focus}  
+        **Nível:** {level}
+        **Público:** {audience}
+        **Área:** {area_focus}
         **Objetivo:** {goal}
 
         ## 1. Visão geral do tema
-        O tema **{theme}** é importante porque ajuda a transformar conhecimento em ação. Quando o aluno entende esse assunto, ele consegue resolver problemas, tomar decisões melhores e explicar o conteúdo com segurança.
+        O tema **{theme}** é importante porque ajuda a transformar conhecimento em ação.
 
         ## 2. Explicação intuitiva
         {intuitive_map.get(category, intuitive_map['generic'])}
@@ -720,13 +503,12 @@ def generate_local_lesson(payload: dict[str, Any]) -> str:
         - focar só na ferramenta e esquecer o problema real
 
         ## 9. Como ensinar esse conteúdo para outra pessoa
-        Comece com uma analogia simples. Em seguida, mostre o conceito técnico em linguagem acessível. Depois, apresente um exemplo real. Por fim, peça que a pessoa explique com as próprias palavras o que entendeu.
+        Comece com uma analogia simples. Depois, mostre o conceito técnico em linguagem acessível.
 
         ## 10. Resumo inteligente
         - **Resumo:** {theme} combina entendimento, aplicação e comunicação.
         - **Palavras-chave:** conceito, prática, aplicação, exemplo, resultado.
         - **Checklist:** consigo definir? consigo dar exemplo? consigo aplicar? consigo ensinar?
-        - **Perguntas de revisão:** o que é? para que serve? como funciona? onde usar? quais erros evitar?
 
         {code_block}
 
@@ -740,79 +522,147 @@ def generate_local_lesson(payload: dict[str, Any]) -> str:
 
 
 # ============================================================
-# Integração com API de IA
+# Integração com APIs de IA
 # ============================================================
-def get_ai_config() -> dict[str, Any]:
+def get_provider_configs() -> dict[str, dict[str, Any]]:
     try:
-        api_key = st.secrets.get("OPENAI_API_KEY", "")
-        model = st.secrets.get("OPENAI_MODEL", "gpt-4.1-mini")
-        base_url = st.secrets.get("OPENAI_BASE_URL", "https://api.openai.com/v1")
+        groq_api_key = st.secrets.get("GROQ_API_KEY", "")
+        groq_model = st.secrets.get("GROQ_MODEL", "llama-3.3-70b-versatile")
+        groq_base_url = st.secrets.get("GROQ_BASE_URL", "https://api.groq.com/openai/v1")
+
+        gemini_api_key = st.secrets.get("GEMINI_API_KEY", "")
+        gemini_model = st.secrets.get("GEMINI_MODEL", "gemini-2.5-flash")
+        gemini_base_url = st.secrets.get("GEMINI_BASE_URL", "https://generativelanguage.googleapis.com/v1beta")
     except Exception:
-        api_key = ""
-        model = "gpt-4.1-mini"
-        base_url = "https://api.openai.com/v1"
+        groq_api_key = ""
+        groq_model = "llama-3.3-70b-versatile"
+        groq_base_url = "https://api.groq.com/openai/v1"
+        gemini_api_key = ""
+        gemini_model = "gemini-2.5-flash"
+        gemini_base_url = "https://generativelanguage.googleapis.com/v1beta"
 
     return {
-        "api_key": api_key,
-        "model": model,
-        "base_url": base_url,
-        "enabled": bool(api_key),
+        "Groq": {
+            "api_key": groq_api_key,
+            "model": groq_model,
+            "base_url": groq_base_url,
+            "enabled": bool(groq_api_key),
+        },
+        "Gemini": {
+            "api_key": gemini_api_key,
+            "model": gemini_model,
+            "base_url": gemini_base_url,
+            "enabled": bool(gemini_api_key),
+        },
     }
 
 
-
-def extract_text_from_response(data: dict[str, Any]) -> str:
-    if isinstance(data, dict):
-        if isinstance(data.get("output_text"), str) and data["output_text"].strip():
-            return data["output_text"].strip()
-
-        output = data.get("output", [])
-        collected: list[str] = []
-        for item in output:
-            content_items = item.get("content", []) if isinstance(item, dict) else []
-            for content in content_items:
-                if isinstance(content, dict):
-                    text_value = content.get("text")
-                    if isinstance(text_value, str) and text_value.strip():
-                        collected.append(text_value.strip())
-        if collected:
-            return "\n\n".join(collected)
-
-    return ""
+def available_generation_modes() -> list[str]:
+    configs = get_provider_configs()
+    modes = ["Modo local"]
+    for provider_name, config in configs.items():
+        if config["enabled"]:
+            modes.insert(0, provider_name)
+    return modes
 
 
-
-def generate_with_ai(prompt: str, temperature: float = 0.4) -> str:
-    config = get_ai_config()
+def generate_with_groq(prompt: str, temperature: float = 0.4) -> str:
+    config = get_provider_configs()["Groq"]
     if not config["enabled"]:
-        raise RuntimeError("Integração com IA não configurada.")
+        raise RuntimeError("Groq não configurado.")
 
     headers = {
         "Authorization": f"Bearer {config['api_key']}",
         "Content-Type": "application/json",
     }
-
     payload = {
         "model": config["model"],
-        "input": prompt,
+        "messages": [
+            {"role": "system", "content": "Você é um professor especialista, didático e orientado a resultados."},
+            {"role": "user", "content": prompt},
+        ],
         "temperature": temperature,
     }
 
     response = requests.post(
-        f"{config['base_url'].rstrip('/')}/responses",
+        f"{config['base_url'].rstrip('/')}/chat/completions",
         headers=headers,
         data=json.dumps(payload),
         timeout=120,
     )
-
     if response.status_code >= 400:
-        raise RuntimeError(f"Erro da API: {response.status_code} - {response.text[:500]}")
+        raise RuntimeError(f"Erro da API Groq: {response.status_code} - {response.text[:500]}")
 
     data = response.json()
-    text = extract_text_from_response(data)
+    choices = data.get("choices", [])
+    if not choices:
+        raise RuntimeError("A Groq respondeu sem conteúdo utilizável.")
+
+    message = choices[0].get("message", {})
+    content = message.get("content", "")
+    if not isinstance(content, str) or not content.strip():
+        raise RuntimeError("Não foi possível extrair o texto da resposta da Groq.")
+    return content.strip()
+
+
+def extract_text_from_gemini(data: dict[str, Any]) -> str:
+    candidates = data.get("candidates", [])
+    texts: list[str] = []
+    for candidate in candidates:
+        content = candidate.get("content", {})
+        parts = content.get("parts", []) if isinstance(content, dict) else []
+        for part in parts:
+            text = part.get("text") if isinstance(part, dict) else None
+            if isinstance(text, str) and text.strip():
+                texts.append(text.strip())
+    return "\n\n".join(texts).strip()
+
+
+def generate_with_gemini(prompt: str, temperature: float = 0.4) -> str:
+    config = get_provider_configs()["Gemini"]
+    if not config["enabled"]:
+        raise RuntimeError("Gemini não configurado.")
+
+    headers = {"Content-Type": "application/json"}
+    payload = {
+        "systemInstruction": {
+            "parts": [
+                {"text": "Você é um professor especialista, didático e orientado a resultados."}
+            ]
+        },
+        "contents": [
+            {
+                "parts": [
+                    {"text": prompt}
+                ]
+            }
+        ],
+        "generationConfig": {
+            "temperature": temperature
+        },
+    }
+
+    url = (
+        f"{config['base_url'].rstrip('/')}/models/{config['model']}:generateContent"
+        f"?key={config['api_key']}"
+    )
+    response = requests.post(url, headers=headers, data=json.dumps(payload), timeout=120)
+    if response.status_code >= 400:
+        raise RuntimeError(f"Erro da API Gemini: {response.status_code} - {response.text[:500]}")
+
+    data = response.json()
+    text = extract_text_from_gemini(data)
     if not text:
-        raise RuntimeError("A API respondeu, mas não foi possível extrair o texto gerado.")
+        raise RuntimeError("Não foi possível extrair o texto da resposta da Gemini.")
     return text
+
+
+def generate_with_provider(provider: str, prompt: str, temperature: float = 0.4) -> str:
+    if provider == "Groq":
+        return generate_with_groq(prompt, temperature)
+    if provider == "Gemini":
+        return generate_with_gemini(prompt, temperature)
+    raise RuntimeError(f"Provedor não suportado: {provider}")
 
 
 # ============================================================
@@ -845,18 +695,9 @@ def render_sidebar() -> dict[str, Any]:
             placeholder="Ex.: Quero entender o tema do zero e ser capaz de ensinar para outra pessoa.",
             height=100,
         )
-        level = st.selectbox(
-            "Nível",
-            ["Iniciante", "Básico ao Intermediário", "Intermediário", "Básico ao Avançado"],
-        )
-        audience = st.selectbox(
-            "Público",
-            ["Leigo", "Estudante", "Profissional em transição", "Equipe de trabalho"],
-        )
-        area_focus = st.selectbox(
-            "Foco principal",
-            ["Tecnologia", "Dados", "Negócios", "Educação", "Processos", "Outro"],
-        )
+        level = st.selectbox("Nível", ["Iniciante", "Básico ao Intermediário", "Intermediário", "Básico ao Avançado"])
+        audience = st.selectbox("Público", ["Leigo", "Estudante", "Profissional em transição", "Equipe de trabalho"])
+        area_focus = st.selectbox("Foco principal", ["Tecnologia", "Dados", "Negócios", "Educação", "Processos", "Outro"])
 
         st.subheader("Recursos")
         include_code = st.checkbox("Incluir código", value=True)
@@ -865,8 +706,7 @@ def render_sidebar() -> dict[str, Any]:
         include_plan = st.checkbox("Incluir plano de estudo", value=True)
 
         st.subheader("Modo de geração")
-        ai_enabled = get_ai_config()["enabled"]
-        generation_options = ["Modo local"] if not ai_enabled else ["IA real", "Modo local"]
+        generation_options = available_generation_modes()
         generation_mode = st.radio("Escolha o modo", generation_options, index=0)
         temperature = st.slider("Criatividade", min_value=0.0, max_value=1.0, value=0.4, step=0.1)
 
@@ -880,7 +720,7 @@ def render_sidebar() -> dict[str, Any]:
             st.success("Histórico limpo.")
 
         st.divider()
-        st.caption("O app funciona sem API, mas aceita integração com IA por secrets.")
+        st.caption("O app funciona sem API, mas aceita integração com Groq e Gemini por secrets.")
 
     return {
         "theme": theme,
@@ -898,54 +738,52 @@ def render_sidebar() -> dict[str, Any]:
     }
 
 
-
 def render_overview() -> None:
+    configs = get_provider_configs()
+    enabled = [name for name, cfg in configs.items() if cfg["enabled"]]
+    status = ", ".join(enabled) if enabled else "Local"
+
     col1, col2, col3 = st.columns(3)
     with col1:
         st.metric("Histórico da sessão", len(st.session_state.history))
     with col2:
-        st.metric("Modo atual", "IA real" if get_ai_config()["enabled"] else "Local")
+        st.metric("Provedores ativos", status)
     with col3:
         st.metric("App", "Pronto para MVP")
 
-    st.info(
-        "Este app já está preparado para duas fases: teste local sem custo e geração inteligente com API de IA quando você adicionar a chave nas secrets."
-    )
-
+    st.info("Este app funciona em modo local e também pode gerar conteúdo via Groq ou Gemini quando as chaves forem configuradas.")
 
 
 def render_setup_tab() -> None:
-    st.subheader("Como ligar a IA real")
+    st.subheader("Como ligar Groq e Gemini")
     st.markdown(
         """
         Crie o arquivo `.streamlit/secrets.toml` no projeto local ou configure as secrets no ambiente de deploy.
 
         Exemplo:
         ```toml
-        OPENAI_API_KEY = "sua_chave_aqui"
-        OPENAI_MODEL = "gpt-4.1-mini"
-        OPENAI_BASE_URL = "https://api.openai.com/v1"
-        ```
+        GROQ_API_KEY = "sua_chave_groq"
+        GROQ_MODEL = "llama-3.3-70b-versatile"
+        GROQ_BASE_URL = "https://api.groq.com/openai/v1"
 
-        Depois disso, o app passa a usar a API automaticamente.
+        GEMINI_API_KEY = "sua_chave_gemini"
+        GEMINI_MODEL = "gemini-2.5-flash"
+        GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta"
+        ```
         """
     )
 
     st.subheader("Dependências sugeridas")
     st.code("streamlit>=1.44.0\nrequests>=2.31.0", language="txt")
 
-    st.subheader("Próximas evoluções")
+    st.subheader("Observações de integração")
     st.markdown(
         """
-        - autenticação de usuário
-        - banco de dados para histórico persistente
-        - exportação em PDF e DOCX
-        - trilhas de estudo
-        - painel administrativo
-        - cobrança por plano
+        - Groq usa endpoint compatível com OpenAI em `/chat/completions`.
+        - Gemini usa `generateContent` por modelo.
+        - O modo local continua disponível como fallback.
         """
     )
-
 
 
 def render_history_tab() -> None:
@@ -966,13 +804,12 @@ def render_history_tab() -> None:
             )
 
 
-
 def render_generator_tab(payload: dict[str, Any]) -> None:
     st.subheader("Gerador inteligente")
     st.markdown(
         """
         Preencha os campos na barra lateral e clique em **Gerar aula completa**.
-        O conteúdo pode ser criado por IA real ou pelo modo local estruturado.
+        O conteúdo pode ser criado por Groq, Gemini ou pelo modo local estruturado.
         """
     )
 
@@ -998,9 +835,9 @@ def render_generator_tab(payload: dict[str, Any]) -> None:
 
         with st.spinner("Gerando aula..."):
             try:
-                if payload["generation_mode"] == "IA real" and get_ai_config()["enabled"]:
-                    result = generate_with_ai(prompt, temperature=payload["temperature"])
-                    source = "IA real"
+                if payload["generation_mode"] in ["Groq", "Gemini"]:
+                    result = generate_with_provider(payload["generation_mode"], prompt, temperature=payload["temperature"])
+                    source = payload["generation_mode"]
                 else:
                     result = generate_local_lesson(payload)
                     source = "Modo local"
@@ -1022,7 +859,6 @@ def render_generator_tab(payload: dict[str, Any]) -> None:
         )
 
 
-
 def main() -> None:
     init_session_state()
     render_header()
@@ -1030,7 +866,6 @@ def main() -> None:
     render_overview()
 
     tab1, tab2, tab3 = st.tabs(["Gerar aula", "Histórico", "Configuração"])
-
     with tab1:
         render_generator_tab(payload)
     with tab2:
