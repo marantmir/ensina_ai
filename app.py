@@ -511,10 +511,10 @@ def generate_local_lesson(payload: dict) -> str:
     project_block = ""
     if project:
         steps_md = "
-        ".join([f"{i+1}. {step}" for i, step in enumerate(project["steps"])])
-        tools_md = "
-        ".join([f"- {tool}" for tool in project["tools"]])
-        project_block = dedent(
+            ".join([f"{i+1}. {step}" for i, step in enumerate(project["steps"])])
+            tools_md = "
+            ".join([f"- {tool}" for tool in project["tools"]])
+            project_block = dedent(
             f"""
             ## Projeto prático pronto para uso
             **Nome do projeto:** {project['name']}
