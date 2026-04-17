@@ -169,104 +169,370 @@ def build_prompt(
 
 
 # ============================================================
-# Geração local de fallback
+# Geração local com conteúdo real
 # ============================================================
+def infer_theme_category(theme: str) -> str:
+    t = theme.lower()
+    if any(k in t for k in ["sql", "bigquery", "query", "banco de dados"]):
+        return "sql"
+    if any(k in t for k in ["python", "pandas", "numpy", "streamlit"]):
+        return "python"
+    if any(k in t for k in ["machine learning", "aprendizado de máquina", "ml", "regress", "classifica"]):
+        return "ml"
+    if any(k in t for k in ["power bi", "dax", "power query", "bi"]):
+        return "powerbi"
+    if any(k in t for k in ["crisp-dm", "crisp dm", "metodologia de dados"]):
+        return "crispdm"
+    if any(k in t for k in ["processo", "lean", "six sigma", "melhoria contínua", "bpm"]):
+        return "processos"
+    return "generic"
+
+
+
+def get_code_example(theme: str, category: str) -> str:
+    examples = {
+        "sql": dedent(
+            """
+            ## Código pronto para aula
+            ```sql
+            -- Exemplo: análise simples de vendas
+            SELECT
+                categoria,
+                COUNT(*) AS total_pedidos,
+                ROUND(SUM(valor_venda), 2) AS faturamento,
+                ROUND(AVG(valor_venda), 2) AS ticket_medio
+            FROM vendas
+            WHERE data_venda >= '2026-01-01'
+            GROUP BY categoria
+            ORDER BY faturamento DESC;
+            ```
+
+            **Como explicar esse código em aula:**
+            - `SELECT` escolhe as colunas e cálculos.
+            - `COUNT(*)` conta quantos pedidos existem em cada categoria.
+            - `SUM(valor_venda)` soma o faturamento.
+            - `AVG(valor_venda)` calcula o valor médio por venda.
+            - `WHERE` filtra o período.
+            - `GROUP BY` agrupa por categoria.
+            - `ORDER BY` mostra as categorias mais relevantes primeiro.
+
+            **Exercício guiado:**
+            Peça ao aluno para trocar `categoria` por `cliente` ou `regiao` e observar como a análise muda.
+            """
+        ).strip(),
+        "python": dedent(
+            """
+            ## Código pronto para aula
+            ```python
+            import pandas as pd
+
+            dados = {
+                "produto": ["A", "B", "C", "D"],
+                "vendas": [120, 90, 150, 80],
+                "custo": [70, 50, 80, 45]
+            }
+
+            df = pd.DataFrame(dados)
+            df["lucro"] = df["vendas"] - df["custo"]
+            df["margem"] = (df["lucro"] / df["vendas"]) * 100
+
+            print(df)
+            print("Lucro total:", df["lucro"].sum())
+            ```
+
+            **Como explicar esse código em aula:**
+            - `DataFrame` organiza os dados em formato de tabela.
+            - A coluna `lucro` mostra a diferença entre venda e custo.
+            - A coluna `margem` mostra o percentual de ganho.
+            - `sum()` soma o lucro de todos os produtos.
+
+            **Resultado esperado:**
+            O aluno entende como transformar dados brutos em informação útil.
+            """
+        ).strip(),
+        "ml": dedent(
+            """
+            ## Código pronto para aula
+            ```python
+            import pandas as pd
+            from sklearn.model_selection import train_test_split
+            from sklearn.linear_model import LinearRegression
+            from sklearn.metrics import mean_absolute_error
+
+            df = pd.DataFrame({
+                "horas_estudo": [1, 2, 3, 4, 5, 6, 7, 8],
+                "nota": [3, 4, 4.5, 5, 6, 7, 8, 9]
+            })
+
+            X = df[["horas_estudo"]]
+            y = df["nota"]
+
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)
+
+            modelo = LinearRegression()
+            modelo.fit(X_train, y_train)
+
+            previsoes = modelo.predict(X_test)
+            erro = mean_absolute_error(y_test, previsoes)
+
+            print("Previsões:", previsoes)
+            print("Erro médio absoluto:", round(erro, 2))
+            ```
+
+            **Como explicar esse código em aula:**
+            - O modelo aprende a relação entre horas de estudo e nota.
+            - `fit()` é a etapa de aprendizado.
+            - `predict()` gera previsões para novos dados.
+            - `mean_absolute_error` mede o quanto o modelo erra, em média.
+            """
+        ).strip(),
+        "powerbi": dedent(
+            """
+            ## Conteúdo prático para aula
+            ### Medidas DAX prontas
+            ```DAX
+            Faturamento Total = SUM(Vendas[ValorVenda])
+
+            Ticket Médio = DIVIDE(SUM(Vendas[ValorVenda]), COUNT(Vendas[IDPedido]))
+
+            Margem Percentual =
+            DIVIDE(
+                SUM(Vendas[Lucro]),
+                SUM(Vendas[ValorVenda]),
+                0
+            )
+            ```
+
+            **Como explicar em aula:**
+            - `SUM` soma os valores.
+            - `COUNT` conta registros.
+            - `DIVIDE` evita erro por divisão por zero.
+            - As medidas podem ser usadas em cartões, tabelas e gráficos.
+
+            **Exercício guiado:**
+            Criar um painel com faturamento, ticket médio e margem por categoria.
+            """
+        ).strip(),
+        "crispdm": dedent(
+            """
+            ## Estrutura pronta para aula
+            ### Exemplo aplicado de CRISP-DM
+            1. **Entendimento do negócio:** reduzir cancelamento de clientes.
+            2. **Entendimento dos dados:** analisar histórico de uso, perfil e reclamações.
+            3. **Preparação dos dados:** tratar nulos, padronizar colunas e criar variáveis.
+            4. **Modelagem:** testar classificação para prever risco de cancelamento.
+            5. **Avaliação:** medir precisão, recall e impacto no negócio.
+            6. **Implantação:** entregar dashboard e lista de clientes com maior risco.
+
+            **Como explicar em aula:**
+            Mostre que o CRISP-DM não começa na modelagem; ele começa no problema real.
+            """
+        ).strip(),
+        "processos": dedent(
+            """
+            ## Exemplo prático para aula
+            ### Mapeamento simples de processo
+            **Processo:** atendimento de incidente de TI
+
+            Etapas:
+            1. Registro do chamado
+            2. Triagem
+            3. Direcionamento para equipe
+            4. Tratativa
+            5. Validação com usuário
+            6. Encerramento
+
+            **Métricas para ensinar:**
+            - tempo de primeira resposta
+            - tempo total de resolução
+            - taxa de reabertura
+            - volume por fila
+
+            **Exercício guiado:**
+            Peça ao aluno para identificar gargalos e propor melhoria em uma etapa.
+            """
+        ).strip(),
+        "generic": dedent(
+            f"""
+            ## Exemplo aplicável
+            Para o tema **{theme}**, mostre em aula:
+            - um problema real
+            - uma forma simples de resolver
+            - uma pequena atividade prática
+            - uma forma de medir se o aluno aprendeu
+            """
+        ).strip(),
+    }
+    return examples.get(category, examples["generic"])
+
+
+
+def get_project_example(theme: str, category: str) -> str:
+    projects = {
+        "sql": {
+            "name": "Mini Laboratório de Consultas SQL",
+            "objective": "Ensinar leitura, filtro, agrupamento e ordenação de dados em tabelas de vendas.",
+            "problem": "Muitas pessoas sabem a teoria de SQL, mas travam ao montar consultas úteis para análise.",
+            "steps": [
+                "Criar uma tabela simples de vendas com colunas de data, categoria, cliente e valor.",
+                "Montar consultas com SELECT, WHERE, GROUP BY e ORDER BY.",
+                "Criar perguntas de negócio para os alunos responderem com SQL.",
+                "Comparar respostas corretas e discutir otimizações.",
+            ],
+            "tools": ["SQLite, BigQuery ou PostgreSQL", "Editor SQL", "GitHub"],
+            "deliverable": "Uma coleção de consultas prontas e comentadas para uso em aula.",
+        },
+        "python": {
+            "name": "Análise de Vendas com Python e Pandas",
+            "objective": "Ensinar manipulação de dados, criação de colunas e análise básica.",
+            "problem": "Iniciantes têm dificuldade para ligar Python a situações reais de negócio.",
+            "steps": [
+                "Criar um DataFrame com dados simples de vendas.",
+                "Calcular lucro, margem e ranking de produtos.",
+                "Exibir o resultado em tabela e gráfico.",
+                "Explicar cada etapa em linguagem simples.",
+            ],
+            "tools": ["Python", "Pandas", "Matplotlib ou Streamlit", "GitHub"],
+            "deliverable": "Um notebook ou app simples com análise pronta para demonstração em aula.",
+        },
+        "ml": {
+            "name": "Preditor Simples de Desempenho",
+            "objective": "Ensinar o fluxo básico de machine learning de forma leve.",
+            "problem": "Muitos alunos veem ML como algo complexo demais e não conseguem enxergar a lógica do processo.",
+            "steps": [
+                "Escolher uma variável de entrada e uma de saída.",
+                "Separar dados de treino e teste.",
+                "Treinar um modelo simples.",
+                "Avaliar o erro e discutir limitações.",
+            ],
+            "tools": ["Python", "Pandas", "Scikit-learn", "Jupyter ou Streamlit"],
+            "deliverable": "Um exemplo funcional de regressão com explicação didática.",
+        },
+        "powerbi": {
+            "name": "Dashboard de Indicadores Comerciais",
+            "objective": "Ensinar modelagem simples, medidas DAX e visualização de KPIs.",
+            "problem": "Usuários iniciantes costumam criar gráficos bonitos, mas sem lógica analítica.",
+            "steps": [
+                "Importar uma tabela de vendas.",
+                "Criar medidas de faturamento, ticket médio e margem.",
+                "Montar uma página com cartões e gráficos.",
+                "Apresentar a leitura do dashboard como história de negócio.",
+            ],
+            "tools": ["Power BI Desktop", "Excel ou CSV", "GitHub para documentação"],
+            "deliverable": "Um dashboard com KPIs e narrativa analítica.",
+        },
+        "crispdm": {
+            "name": "Projeto Guiado com CRISP-DM",
+            "objective": "Ensinar metodologia de dados conectando problema, dados, modelo e entrega.",
+            "problem": "Muitas pessoas começam pelo algoritmo e esquecem do contexto do negócio.",
+            "steps": [
+                "Definir o problema de negócio.",
+                "Mapear os dados disponíveis.",
+                "Planejar preparação e modelagem.",
+                "Definir como avaliar e implantar o resultado.",
+            ],
+            "tools": ["Documento estruturado", "Python ou Power BI", "GitHub"],
+            "deliverable": "Um projeto completo documentado pelas seis fases do CRISP-DM.",
+        },
+        "processos": {
+            "name": "Diagnóstico de Processo Operacional",
+            "objective": "Ensinar análise de processo, gargalos e indicadores.",
+            "problem": "Equipes conhecem a operação, mas não conseguem estruturá-la para melhorar.",
+            "steps": [
+                "Escolher um processo simples.",
+                "Mapear etapas, entradas e saídas.",
+                "Definir métricas principais.",
+                "Propor melhoria com justificativa.",
+            ],
+            "tools": ["Miro, Draw.io ou PowerPoint", "Excel", "Documento em Markdown"],
+            "deliverable": "Mapa do processo com proposta de melhoria e indicadores.",
+        },
+        "generic": {
+            "name": f"Projeto Aplicado de {theme}",
+            "objective": f"Transformar o tema {theme} em algo ensinável e aplicável.",
+            "problem": f"Pessoas iniciantes costumam ter dificuldade para sair da teoria em {theme}.",
+            "steps": [
+                "Explicar o conceito central.",
+                "Criar um exemplo prático.",
+                "Aplicar em um pequeno caso.",
+                "Registrar o aprendizado como portfólio.",
+            ],
+            "tools": ["Markdown", "PowerPoint ou Google Slides", "GitHub"],
+            "deliverable": "Um material didático com explicação, atividade e resultado.",
+        },
+    }
+    return projects.get(category, projects["generic"])
+
+
+
 def generate_local_lesson(payload: dict) -> str:
     theme = payload["theme"]
     level = payload["level"]
     audience = payload["audience"]
     area_focus = payload["area_focus"]
     goal = payload["lesson_goal"]
-
-    code_block = ""
-    if payload["include_code"]:
-        code_block = dedent(
-            f"""
-            ## Exemplo de código ilustrativo
-            ```python
-            tema = "{theme}"
-            nivel = "{level}"
-            publico = "{audience}"
-
-            print(f"Aula sobre: {{tema}}")
-            print(f"Nível: {{nivel}}")
-            print(f"Público: {{publico}}")
-            ```
-
-            **Explicação:**
-            - A variável `tema` guarda o assunto principal.
-            - A variável `nivel` define a profundidade.
-            - A variável `publico` ajuda a adaptar a linguagem.
-            - O `print()` mostra as informações de forma simples.
-            """
-        ).strip()
+    category = infer_theme_category(theme)
+    code_block = get_code_example(theme, category) if payload["include_code"] else ""
+    project = get_project_example(theme, category) if payload["include_project"] else None
 
     exercises_block = ""
     if payload["include_exercises"]:
         exercises_block = dedent(
             f"""
-            ## Exercícios
-            ### Básico
+            ## Exercícios prontos para utilizar na aula
+            ### Nível básico
             1. Explique com suas palavras o que é **{theme}**.
-            2. Cite uma utilidade prática de **{theme}**.
-            3. Qual é a diferença entre conhecer o conceito e aplicá-lo?
+            2. Cite um problema real que pode ser resolvido com **{theme}**.
+            3. Qual é o principal erro de quem aprende esse tema apenas decorando?
 
-            **Respostas comentadas:**
-            - O aluno deve mostrar entendimento claro e simples.
-            - A utilidade prática pode ser ligada ao dia a dia ou trabalho.
-            - Aplicar significa transformar teoria em ação.
+            **Gabarito comentado:**
+            - A resposta deve mostrar entendimento simples e objetivo.
+            - O problema real precisa conectar o tema à prática.
+            - Decorar sem entender impede aplicação real.
 
-            ### Intermediário
-            1. Monte um exemplo profissional em que **{theme}** seria útil.
-            2. Liste erros comuns de iniciantes e como evitá-los.
+            ### Nível intermediário
+            1. Monte um exemplo profissional de uso de **{theme}**.
+            2. Liste três conceitos fundamentais e explique o papel de cada um.
 
-            **Respostas comentadas:**
-            - O aluno precisa conectar teoria e realidade.
-            - Os erros devem ser acompanhados por ação corretiva.
+            **Gabarito comentado:**
+            - O aluno deve mostrar contexto, lógica e benefício.
+            - Os conceitos devem ser descritos com clareza, não apenas citados.
 
-            ### Desafio
-            1. Crie uma mini aula de 5 minutos sobre **{theme}** para alguém sem experiência.
+            ### Nível desafio
+            1. Estruture uma mini explicação de 5 minutos sobre **{theme}** para um público leigo.
+            2. Proponha uma atividade prática curta para validar aprendizado.
 
-            **Resposta esperada:**
-            - Explicação simples
-            - Exemplo real
-            - Fechamento com aplicação prática
+            **Gabarito comentado:**
+            - A mini explicação deve ter abertura, conceito, exemplo e fechamento.
+            - A atividade prática precisa gerar evidência de entendimento.
             """
         ).strip()
 
     project_block = ""
-    if payload["include_project"]:
+    if project:
+        steps_md = "
+".join([f"{i+1}. {step}" for i, step in enumerate(project["steps"])])
+        tools_md = "
+".join([f"- {tool}" for tool in project["tools"]])
         project_block = dedent(
             f"""
-            ## Projeto prático para portfólio
-            **Nome do projeto:** {theme} na prática
+            ## Projeto prático pronto para uso
+            **Nome do projeto:** {project['name']}
 
             **Objetivo:**
-            Construir um material aplicável sobre **{theme}** com foco em aprendizado e apresentação.
+            {project['objective']}
 
-            **Problema real que resolve:**
-            Muitas pessoas têm dificuldade para entender {theme} com clareza e transformar isso em ação.
+            **Problema que resolve:**
+            {project['problem']}
 
-            **Etapas:**
-            1. Definir o problema que será explicado.
-            2. Organizar conceitos essenciais.
-            3. Criar exemplo prático.
-            4. Montar exercício de validação.
-            5. Transformar em material de portfólio.
+            **Passo a passo:**
+            {steps_md}
 
             **Ferramentas sugeridas:**
-            - Streamlit
-            - Python
-            - Markdown
-            - GitHub
+            {tools_md}
 
-            **Resultado esperado:**
-            Um mini produto educacional claro, útil e apresentável.
-
-            **Melhorias futuras:**
-            - adicionar exportação em PDF
-            - incluir trilha de estudo
-            - salvar progresso do aluno
+            **Entrega final esperada:**
+            {project['deliverable']}
             """
         ).strip()
 
@@ -274,16 +540,36 @@ def generate_local_lesson(payload: dict) -> str:
     if payload["include_plan"]:
         plan_block = dedent(
             f"""
-            ## Plano de estudo de 7 dias
-            - **Dia 1:** visão geral de {theme}
+            ## Plano de aula ou estudo em 7 dias
+            - **Dia 1:** visão geral e motivação sobre {theme}
             - **Dia 2:** conceitos fundamentais
             - **Dia 3:** base teórica essencial
-            - **Dia 4:** aplicações práticas
-            - **Dia 5:** exercícios
-            - **Dia 6:** projeto prático
-            - **Dia 7:** revisão e explicação para outra pessoa
+            - **Dia 4:** leitura de exemplo prático
+            - **Dia 5:** execução dos exercícios
+            - **Dia 6:** desenvolvimento do projeto
+            - **Dia 7:** apresentação, revisão e ensino para outra pessoa
             """
         ).strip()
+
+    theory_map = {
+        "sql": "SQL é a linguagem usada para consultar e manipular dados em bancos relacionais. A lógica principal está em selecionar, filtrar, agrupar e ordenar informações para responder perguntas de negócio.",
+        "python": "Python é uma linguagem muito usada para automação, análise de dados e desenvolvimento de aplicações. Seu valor no ensino está na leitura simples e na capacidade de transformar lógica em resultado prático.",
+        "ml": "Machine Learning ensina o computador a identificar padrões a partir de dados. Em vez de programar todas as regras manualmente, fornecemos exemplos para o modelo aprender relações e fazer previsões.",
+        "powerbi": "Power BI ajuda a transformar dados em painéis analíticos e indicadores. O foco não deve ser só visual, mas também interpretação, perguntas de negócio e tomada de decisão.",
+        "crispdm": "CRISP-DM é uma metodologia que organiza projetos de dados do entendimento do problema até a implantação. Ele evita que a análise fique solta e sem conexão com o negócio.",
+        "processos": "Processos bem definidos reduzem desperdício, aumentam previsibilidade e melhoram entregas. O valor do tema está em enxergar etapas, gargalos, métricas e oportunidades de melhoria.",
+        "generic": f"{theme} deve ser ensinado como algo que sai da teoria e chega à prática. O ponto principal é mostrar conceito, aplicação e utilidade real.",
+    }
+
+    intuitive_map = {
+        "sql": "Imagine um arquivo gigante de informações. SQL é a forma organizada de fazer perguntas a esse arquivo para encontrar respostas com rapidez.",
+        "python": "Imagine que você quer ensinar o computador a repetir tarefas e fazer contas por você. Python é uma forma simples de dar essas instruções.",
+        "ml": "Pense em Machine Learning como um aluno que observa muitos exemplos e começa a reconhecer padrões sozinho.",
+        "powerbi": "Pense no Power BI como uma vitrine inteligente dos dados: ele não cria os fatos, mas mostra com clareza o que está acontecendo.",
+        "crispdm": "Pense no CRISP-DM como um mapa de viagem para projetos de dados: ele evita que você se perca no caminho.",
+        "processos": "Pense em processos como o passo a passo de uma receita. Quando a ordem é clara, o resultado tende a ser melhor.",
+        "generic": f"Pense em {theme} como uma ferramenta para entender melhor um problema e agir de forma mais segura.",
+    }
 
     return dedent(
         f"""
@@ -295,45 +581,48 @@ def generate_local_lesson(payload: dict) -> str:
         **Objetivo:** {goal}
 
         ## 1. Abertura da aula
-        {theme} é importante porque ajuda a transformar conhecimento em resultado. Quando o aluno entende o conceito, ele consegue aplicar, explicar e tomar decisões melhores.
+        O tema **{theme}** é importante porque ajuda a transformar conhecimento em ação. Quando o aluno entende esse assunto, ele consegue resolver problemas, tomar decisões melhores e explicar o conteúdo com segurança.
 
         ## 2. Explicação intuitiva
-        Pense em {theme} como uma ferramenta que organiza a forma como você entende e resolve um problema. Em vez de decorar, você passa a enxergar lógica, utilidade e aplicação.
+        {intuitive_map.get(category, intuitive_map['generic'])}
 
         ## 3. Fundamentos essenciais
-        - Conceito central do tema
-        - Elementos principais
-        - Relação entre teoria e prática
-        - Como o tema aparece em situações reais
+        - entender o conceito principal do tema
+        - reconhecer os elementos que fazem o tema funcionar
+        - saber onde ele aparece no dia a dia e no trabalho
+        - ligar teoria, prática e resultado
 
         ## 4. Base teórica essencial
-        A teoria existe para evitar aplicação superficial. O objetivo aqui não é cansar, mas dar sustentação para que a prática faça sentido.
+        {theory_map.get(category, theory_map['generic'])}
 
         ## 5. Aplicação prática guiada
-        1. Identifique onde o tema aparece.
-        2. Separe os conceitos mais importantes.
-        3. Teste com um exemplo simples.
-        4. Explique o que aconteceu.
-        5. Replique em um caso mais próximo da realidade.
+        1. Comece apresentando um problema simples.
+        2. Mostre como {theme} ajuda a organizar a solução.
+        3. Demonstre um exemplo pequeno e comentado.
+        4. Peça ao aluno para adaptar o exemplo.
+        5. Finalize conectando o conteúdo a um caso profissional.
 
-        ## 6. Exemplos reais
-        - **Dia a dia:** usar lógica, análise ou organização para resolver uma tarefa comum.
-        - **Profissional:** usar {theme} para melhorar decisões, processos, análises ou entregas.
+        ## 6. Exemplo do dia a dia
+        Mostre uma situação simples em que alguém precisa organizar informação, comparar opções, prever resultado ou melhorar uma atividade. A partir daí, conecte essa necessidade ao tema.
 
-        ## 7. Erros comuns
-        - querer avançar sem dominar a base
-        - decorar sem entender
-        - ignorar a prática
-        - não revisar o conteúdo
+        ## 7. Exemplo profissional
+        Apresente um cenário de negócio no qual {theme} ajuda a gerar eficiência, análise, melhoria, previsão ou decisão mais embasada.
 
-        ## 8. Como ensinar esse conteúdo
-        Explique primeiro com um exemplo simples. Depois conecte com o conceito técnico. Por fim, mostre aplicação real e valide com perguntas.
+        ## 8. Erros comuns
+        - tentar avançar sem dominar a base
+        - decorar sem entender a lógica
+        - ignorar exercícios práticos
+        - não revisar o que foi aprendido
+        - focar na ferramenta e esquecer o problema real
 
-        ## 9. Revisão inteligente
+        ## 9. Como ensinar esse conteúdo para outra pessoa
+        Comece com uma analogia simples. Em seguida, mostre o conceito técnico em linguagem acessível. Depois, apresente um exemplo real. Por fim, peça que a pessoa explique com as próprias palavras o que entendeu.
+
+        ## 10. Resumo inteligente
         - **Resumo:** {theme} combina entendimento, aplicação e comunicação.
-        - **Palavras-chave:** conceito, prática, explicação, aplicação, revisão
-        - **Checklist:** entendi? consigo explicar? consigo aplicar? consigo mostrar um exemplo?
-        - **Perguntas:** o que é? para que serve? onde aplicar? quais erros evitar? como ensinar?
+        - **Palavras-chave:** conceito, prática, aplicação, exemplo, resultado.
+        - **Checklist:** consigo definir? consigo dar exemplo? consigo aplicar? consigo ensinar?
+        - **Perguntas de revisão:** o que é? para que serve? como funciona? onde usar? quais erros evitar?
 
         {code_block}
 
